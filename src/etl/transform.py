@@ -1,0 +1,267 @@
+from pathlib import Path
+import pandas as pd
+from unidecode import unidecode
+
+MAIN_DIR = Path(__file__).parent.parent.parent
+RAW_DATA_DIR = MAIN_DIR / "data" / "raw"
+PROCESSED_DATA_DIR = MAIN_DIR / "data" / "processed"
+
+PROCESSED_DATA_DIR.mkdir(parents=True, exist_ok=True)
+
+
+def normalize_text(series: pd.Series) -> pd.Series:
+    """
+    Приводит текст к единому формату.
+    """
+
+    return (
+        series
+        .fillna("")
+        .str.strip()
+        .str.lower()
+        .apply(unidecode)
+    )
+
+
+def save_processed(df: pd.DataFrame, filename: str) -> None:
+    """
+    Сохраняет обработанный файл.
+    """
+
+    df.to_csv(PROCESSED_DATA_DIR / filename, index=False)
+
+    print(f"[OK] {filename}")
+
+
+def transform_customers() -> pd.DataFrame:
+    df = pd.read_csv(RAW_DATA_DIR / "olist_customers_dataset.csv", dtype=str)
+
+    df = df.drop_duplicates(subset=["customer_id"])
+
+    df["customer_city"] = normalize_text(df["customer_city"])
+
+    save_processed(df, "olist_customers_dataset.csv")
+
+    return df
+
+
+def transform_geolocation() -> pd.DataFrame:
+    df = pd.read_csv(RAW_DATA_DIR / "olist_geolocation_dataset.csv",
+                     dtype={"geolocation_zip_code_prefix": str})
+
+    df["geolocation_lat"] = pd.to_numeric(df["geolocation_lat"],
+                                          errors="coerce")
+
+    df["geolocation_lng"] = pd.to_numeric(df["geolocation_lng"],
+                                          errors="coerce")
+
+    df = df.dropna(subset=["geolocation_lat", "geolocation_lng"])
+
+    mask = (df['geolocation_lat'].between(-90, 90) & df['geolocation_lng'].between(-180, 180))
+    df = df.loc[mask]
+
+    df["geolocation_city"] = normalize_text(df["geolocation_city"])
+
+    save_processed(df, "olist_geolocation_dataset.csv")
+
+    return df
+
+
+def transform_orders() -> pd.DataFrame:
+    date_columns = [
+        "order_purchase_timestamp",
+        "order_approved_at",
+        "order_delivered_carrier_date",
+        "order_delivered_customer_date",
+        "order_estimated_delivery_date"
+    ]
+
+    df = pd.read_csv(RAW_DATA_DIR / "olist_orders_dataset.csv", dtype=str)
+
+    for col in date_columns:
+        df[col] = pd.to_datetime(df[col], errors="coerce")
+
+    df = df.drop_duplicates(subset=["order_id"])
+
+    save_processed(df, "olist_orders_dataset.csv")
+
+    return df
+
+
+def transform_order_items() -> pd.DataFrame:
+    df = pd.read_csv(
+        RAW_DATA_DIR / "olist_order_items_dataset.csv",
+        dtype='str'
+    )
+
+    df["order_item_id"] = pd.to_numeric(df["order_item_id"], errors="coerce")
+    df["price"] = pd.to_numeric(df["price"], errors="coerce")
+    df["freight_value"] = pd.to_numeric(df["freight_value"], errors="coerce")
+
+    df['shipping_limit_date'] = pd.to_datetime(df['shipping_limit_date'], errors="coerce")
+
+    df = df.dropna(
+        subset=[
+            "order_item_id",
+            "price",
+            "freight_value"]
+    )
+
+    df = df[df["order_item_id"] > 0]
+    df = df[df["price"] >= 0]
+    df = df[df["freight_value"] >= 0]
+
+    save_processed(df, "olist_order_items_dataset.csv")
+
+    return df
+
+
+def transform_order_payments() -> pd.DataFrame:
+    df = pd.read_csv(
+        RAW_DATA_DIR / "olist_order_payments_dataset.csv",
+        dtype=str
+    )
+
+    df["payment_sequential"] = pd.to_numeric(
+        df["payment_sequential"],
+        errors="coerce"
+    )
+
+    df["payment_installments"] = pd.to_numeric(
+        df["payment_installments"],
+        errors="coerce"
+    )
+
+    df["payment_value"] = pd.to_numeric(
+        df["payment_value"],
+        errors="coerce"
+    )
+
+    df = df[df["payment_value"] >= 0]
+
+    save_processed(
+        df,
+        "olist_order_payments_dataset.csv"
+    )
+
+    return df
+
+
+def transform_reviews() -> pd.DataFrame:
+    date_columns = [
+        "review_creation_date",
+        "review_answer_timestamp"
+    ]
+
+    df = pd.read_csv(
+        RAW_DATA_DIR / "olist_order_reviews_dataset.csv",
+        dtype=str
+    )
+
+    df["review_score"] = pd.to_numeric(
+        df["review_score"],
+        errors="coerce"
+    )
+
+    df = df[
+        df["review_score"].between(1, 5)
+    ]
+
+    for col in date_columns:
+        df[col] = pd.to_datetime(df[col], errors="coerce")
+
+    save_processed(
+        df,
+        "olist_order_reviews_dataset.csv"
+    )
+
+    return df
+
+
+def transform_products() -> pd.DataFrame:
+
+    df = pd.read_csv(
+        RAW_DATA_DIR / "olist_products_dataset.csv",
+        dtype=str
+    )
+
+    numeric_columns = [
+        "product_name_lenght",
+        "product_description_lenght",
+        "product_photos_qty",
+        "product_weight_g",
+        "product_length_cm",
+        "product_height_cm",
+        "product_width_cm"
+    ]
+
+    for col in numeric_columns:
+        df[col] = pd.to_numeric(
+            df[col],
+            errors="coerce"
+        )
+
+    save_processed(
+        df,
+        "olist_products_dataset.csv"
+    )
+
+    return df
+
+
+def transform_sellers() -> pd.DataFrame:
+
+    df = pd.read_csv(
+        RAW_DATA_DIR / "olist_sellers_dataset.csv",
+        dtype=str
+    )
+
+    df["seller_city"] = normalize_text(
+        df["seller_city"]
+    )
+
+    save_processed(
+        df,
+        "olist_sellers_dataset.csv"
+    )
+
+    return df
+
+
+def transform_category_translation() -> pd.DataFrame:
+
+    df = pd.read_csv(
+        RAW_DATA_DIR / "product_category_name_translation.csv",
+        dtype=str
+    )
+
+    df = df.drop_duplicates()
+
+    save_processed(
+        df,
+        "product_category_name_translation.csv"
+    )
+
+    return df
+
+
+def transform() -> None:
+    """
+    Обрабатывает все CSV-файлы из data/raw.
+    """
+
+    transform_customers()
+    transform_geolocation()
+    transform_orders()
+    transform_order_items()
+    transform_order_payments()
+    transform_reviews()
+    transform_products()
+    transform_sellers()
+    transform_category_translation()
+
+    print("\nВсе файлы успешно обработаны.")
+
+
+if __name__ == "__main__":
+    transform()
