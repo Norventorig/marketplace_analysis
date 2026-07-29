@@ -1,6 +1,8 @@
 ALTER TABLE customers
 ADD CONSTRAINT PK_customers PRIMARY KEY (customer_id);
 
+ALTER TABLE geolocation
+ADD CONSTRAINT PK_geolocation PRIMARY KEY (geolocation_id);
 
 ALTER TABLE products
 ADD CONSTRAINT PK_products PRIMARY KEY (product_id),
