@@ -20,6 +20,7 @@ CREATE TABLE IF NOT EXISTS customers
 
 CREATE TABLE IF NOT EXISTS geolocation
     (
+    geolocation_id SERIAL,
     geolocation_zip_code_prefix VARCHAR (5) NOT NULL,
     geolocation_lat DOUBLE PRECISION NOT NULL,
     geolocation_lng DOUBLE PRECISION NOT NULL,
