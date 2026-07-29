@@ -2,6 +2,7 @@ from pathlib import Path
 
 from kaggle.api.kaggle_api_extended import KaggleApi
 
+RAW_DATA_DIR = Path(__file__).parent.parent.parent / "data" / "raw"
 
 DATASET = "olistbr/brazilian-ecommerce"
 
@@ -53,7 +54,4 @@ def download_dataset(download_dir: Path) -> None:
 
 
 if __name__ == "__main__":
-    project_root = Path(__file__).resolve().parent.parent
-    raw_data_dir = project_root / "data" / "raw"
-
-    download_dataset(raw_data_dir)
+    download_dataset(RAW_DATA_DIR)
