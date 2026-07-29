@@ -76,10 +76,19 @@ def transform_orders() -> pd.DataFrame:
         "order_estimated_delivery_date"
     ]
 
+    null_target_columns = [
+        'order_approved_at',
+        'order_delivered_carrier_date',
+        'order_delivered_customer_date'
+    ]
+
     df = pd.read_csv(RAW_DATA_DIR / "olist_orders_dataset.csv", dtype=str)
 
     for col in date_columns:
         df[col] = pd.to_datetime(df[col], errors="coerce")
+
+        if col in null_target_columns:
+            df[col] = df[col].astype(object).where(df[col].notna(), None)
 
     df = df.drop_duplicates(subset=["order_id"])
 
