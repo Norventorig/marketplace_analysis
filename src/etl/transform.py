@@ -94,7 +94,7 @@ def transform_order_items() -> pd.DataFrame:
         dtype='str'
     )
 
-    df["order_item_id"] = pd.to_numeric(df["order_item_id"], errors="coerce")
+    df["order_item_id"] = df["order_item_id"].astype(int)
     df["price"] = pd.to_numeric(df["price"], errors="coerce")
     df["freight_value"] = pd.to_numeric(df["freight_value"], errors="coerce")
 
@@ -117,32 +117,24 @@ def transform_order_items() -> pd.DataFrame:
 
 
 def transform_order_payments() -> pd.DataFrame:
+    integer_columns = [
+        "payment_sequential",
+        "payment_installments"
+    ]
+
     df = pd.read_csv(
         RAW_DATA_DIR / "olist_order_payments_dataset.csv",
         dtype=str
     )
 
-    df["payment_sequential"] = pd.to_numeric(
-        df["payment_sequential"],
-        errors="coerce"
-    )
+    for col in integer_columns:
+        df[col] = df[col].astype(int)
 
-    df["payment_installments"] = pd.to_numeric(
-        df["payment_installments"],
-        errors="coerce"
-    )
-
-    df["payment_value"] = pd.to_numeric(
-        df["payment_value"],
-        errors="coerce"
-    )
+    df["payment_value"] = pd.to_numeric(df["payment_value"], errors="coerce")
 
     df = df[df["payment_value"] >= 0]
 
-    save_processed(
-        df,
-        "olist_order_payments_dataset.csv"
-    )
+    save_processed(df, "olist_order_payments_dataset.csv")
 
     return df
 
@@ -158,22 +150,14 @@ def transform_reviews() -> pd.DataFrame:
         dtype=str
     )
 
-    df["review_score"] = pd.to_numeric(
-        df["review_score"],
-        errors="coerce"
-    )
+    df["review_score"] = df["review_score"].astype(int)
 
-    df = df[
-        df["review_score"].between(1, 5)
-    ]
+    df = df[df["review_score"].between(1, 5)]
 
     for col in date_columns:
         df[col] = pd.to_datetime(df[col], errors="coerce")
 
-    save_processed(
-        df,
-        "olist_order_reviews_dataset.csv"
-    )
+    save_processed(df, "olist_order_reviews_dataset.csv")
 
     return df
 
@@ -185,7 +169,7 @@ def transform_products() -> pd.DataFrame:
         dtype=str
     )
 
-    numeric_columns = [
+    integer_columns = [
         "product_name_lenght",
         "product_description_lenght",
         "product_photos_qty",
@@ -195,11 +179,8 @@ def transform_products() -> pd.DataFrame:
         "product_width_cm"
     ]
 
-    for col in numeric_columns:
-        df[col] = pd.to_numeric(
-            df[col],
-            errors="coerce"
-        )
+    for col in integer_columns:
+        df[col] = df[col].astype('Int64')
 
     save_processed(
         df,
