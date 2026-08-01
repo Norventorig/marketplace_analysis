@@ -4,8 +4,28 @@ from unidecode import unidecode
 
 MAIN_DIR = Path(__file__).parent.parent.parent
 RAW_DATA_DIR = MAIN_DIR / "data" / "raw"
-PROCESSED_DATA_DIR = MAIN_DIR / "data" / "processed"
 
+
+EXPECTED_FILES = {'olist_customers_dataset.csv',
+                  'olist_geolocation_dataset.csv',
+                  'olist_orders_dataset.csv',
+                  'olist_order_items_dataset.csv',
+                  'olist_order_payments_dataset.csv',
+                  'olist_order_reviews_dataset.csv',
+                  'olist_products_dataset.csv',
+                  'olist_sellers_dataset.csv',
+                  'product_category_name_translation.csv'}
+
+if not RAW_DATA_DIR.exists():
+    raise FileNotFoundError("olist_analysis/data/raw does not exist")
+
+current_files = list(RAW_DATA_DIR.glob("*.csv"))
+for file in EXPECTED_FILES:
+    if file not in current_files:
+        raise FileNotFoundError(f"{file} not found in {RAW_DATA_DIR}")
+
+
+PROCESSED_DATA_DIR = MAIN_DIR / "data" / "processed"
 PROCESSED_DATA_DIR.mkdir(parents=True, exist_ok=True)
 
 
