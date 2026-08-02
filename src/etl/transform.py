@@ -19,7 +19,7 @@ EXPECTED_FILES = {'olist_customers_dataset.csv',
 if not RAW_DATA_DIR.exists():
     raise FileNotFoundError("olist_analysis/data/raw does not exist")
 
-current_files = list(RAW_DATA_DIR.glob("*.csv"))
+current_files = [i_file.name for i_file in RAW_DATA_DIR.glob("*.csv")]
 for file in EXPECTED_FILES:
     if file not in current_files:
         raise FileNotFoundError(f"{file} not found in {RAW_DATA_DIR}")
