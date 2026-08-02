@@ -3,6 +3,7 @@ import pandas as pd
 from sqlalchemy import create_engine
 from sqlalchemy import text
 from sqlalchemy.engine import URL
+from sqlalchemy.exc import OperationalError
 
 from transform import transform_customers
 from transform import transform_geolocation
@@ -87,6 +88,25 @@ TABLE_CONFIG = {
 }
 
 
+def check_connection() -> None:
+    """
+    Проверяет доступность базы данных.
+    """
+
+    try:
+        with ENGINE.connect() as connection:
+            connection.execute(text("SELECT 1"))
+
+    except OperationalError as e:
+        raise RuntimeError(
+            f"Не удалось подключиться к базе данных '{DATABASE}'.\n\n"
+            "Возможные причины:\n"
+            "1) база данных не существует;\n"
+            "2) PostgreSQL не запущен;\n"
+            "3) неверные параметры подключения в .env."
+        ) from e
+
+
 def load_table(df: pd.DataFrame, table_name: str, primary_keys: list | None) -> None:
     """ Выполняет UPSERT данных в PostgreSQL. """
 
@@ -151,6 +171,7 @@ def main() -> None:
     """
     Загружает все обработанные датасеты в БД.
     """
+    check_connection()
 
     for filename in TABLE_CONFIG:
         process_file(filename=filename)
