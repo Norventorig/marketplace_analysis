@@ -2,6 +2,7 @@ from pathlib import Path
 import pandas as pd
 from sqlalchemy import create_engine
 from sqlalchemy import text
+from sqlalchemy.engine import URL
 
 from transform import transform_customers
 from transform import transform_geolocation
@@ -24,10 +25,16 @@ HOST = os.getenv("DB_HOST")
 PORT = os.getenv("DB_PORT")
 DATABASE = os.getenv("DB_NAME")
 
-ENGINE = create_engine(
-    f"postgresql+psycopg2://{USERNAME}:{PASSWORD}@{HOST}:{PORT}/{DATABASE}"
+url = URL.create(
+    drivername="postgresql+psycopg2",
+    username=USERNAME,
+    password=PASSWORD,
+    host=HOST,
+    port=PORT,
+    database=DATABASE,
 )
 
+ENGINE = create_engine(url=url)
 
 DATASETS_PATH = Path(__file__).parent.parent.parent / "data" / "processed"
 
