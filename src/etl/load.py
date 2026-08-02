@@ -5,15 +5,15 @@ from sqlalchemy import text
 from sqlalchemy.engine import URL
 from sqlalchemy.exc import OperationalError
 
-from transform import transform_customers
-from transform import transform_geolocation
-from transform import transform_orders
-from transform import transform_order_items
-from transform import transform_order_payments
-from transform import transform_reviews
-from transform import transform_products
-from transform import transform_sellers
-from transform import transform_category_translation
+from src.etl.transform import transform_customers
+from src.etl.transform import transform_geolocation
+from src.etl.transform import transform_orders
+from src.etl.transform import transform_order_items
+from src.etl.transform import transform_order_payments
+from src.etl.transform import transform_reviews
+from src.etl.transform import transform_products
+from src.etl.transform import transform_sellers
+from src.etl.transform import transform_category_translation
 
 import os
 from dotenv import load_dotenv
