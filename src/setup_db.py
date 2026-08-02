@@ -14,7 +14,7 @@ PORT = os.getenv('DB_PORT')
 DATABASE = os.getenv('DB_NAME')
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
-SQL_DIR = PROJECT_ROOT / "sql"
+SQL_DIR = PROJECT_ROOT / "sql" / "db_init"
 
 
 def create_database() -> None:
