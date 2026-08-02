@@ -17,20 +17,20 @@ EXPECTED_FILES = {'olist_customers_dataset.csv',
                   'product_category_name_translation.csv'}
 
 
-def dataset_exists(directory: Path) -> bool:
+def dataset_exists() -> bool:
     """Проверяет, что все файлы датасета уже скачаны."""
-    existing_files = {file.name for file in directory.glob("*.csv")}
+    existing_files = {file.name for file in RAW_DATA_DIR.glob("*.csv")}
     return EXPECTED_FILES.issubset(existing_files)
 
 
-def download_dataset(download_dir: Path) -> None:
+def download_dataset() -> None:
     """
-    Скачивает датаЯсет Olist в указанную директорию.
+    Скачивает датаЯсет Olist в "data" / "raw".
     Если датасет уже существует — повторное скачивание не выполняется.
     """
-    download_dir.mkdir(parents=True, exist_ok=True)
+    RAW_DATA_DIR.mkdir(parents=True, exist_ok=True)
 
-    if dataset_exists(download_dir):
+    if dataset_exists():
         print("Dataset already exists.")
         return
 
@@ -40,18 +40,18 @@ def download_dataset(download_dir: Path) -> None:
 
         api.dataset_download_files(
             dataset=DATASET,
-            path=download_dir,
+            path=RAW_DATA_DIR,
             unzip=True,
         )
 
     except Exception as e:
         raise RuntimeError(f"Failed to download dataset: {e}") from e
 
-    if not dataset_exists(download_dir):
+    if not dataset_exists():
         raise RuntimeError("Dataset download finished, but some files are missing.")
 
-    print(f"Dataset downloaded successfully to:\n{download_dir.resolve()}")
+    print(f"Dataset downloaded successfully to:\n{RAW_DATA_DIR.resolve()}")
 
 
 if __name__ == "__main__":
-    download_dataset(RAW_DATA_DIR)
+    download_dataset()
