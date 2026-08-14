@@ -167,7 +167,7 @@ def process_file(filename: str) -> None:
     )
 
 
-def main() -> None:
+def load_data() -> None:
     """
     Загружает все обработанные датасеты в БД.
     """
@@ -180,4 +180,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    load_data()
