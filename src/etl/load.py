@@ -15,6 +15,8 @@ from src.etl.transform import transform_products
 from src.etl.transform import transform_sellers
 from src.etl.transform import transform_category_translation
 
+from src.etl.transform import validate_raw_data
+
 import os
 from dotenv import load_dotenv
 
@@ -172,6 +174,7 @@ def load_data() -> None:
     Загружает все обработанные датасеты в БД.
     """
     check_connection()
+    validate_raw_data()
 
     for filename in TABLE_CONFIG:
         process_file(filename=filename)

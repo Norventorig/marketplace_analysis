@@ -4,7 +4,8 @@ from unidecode import unidecode
 
 MAIN_DIR = Path(__file__).parent.parent.parent
 RAW_DATA_DIR = MAIN_DIR / "data" / "raw"
-
+PROCESSED_DATA_DIR = MAIN_DIR / "data" / "processed"
+PROCESSED_DATA_DIR.mkdir(parents=True, exist_ok=True)
 
 EXPECTED_FILES = {'olist_customers_dataset.csv',
                   'olist_geolocation_dataset.csv',
@@ -16,17 +17,22 @@ EXPECTED_FILES = {'olist_customers_dataset.csv',
                   'olist_sellers_dataset.csv',
                   'product_category_name_translation.csv'}
 
-if not RAW_DATA_DIR.exists():
-    raise FileNotFoundError("olist_analysis/data/raw does not exist")
 
-current_files = [i_file.name for i_file in RAW_DATA_DIR.glob("*.csv")]
-for file in EXPECTED_FILES:
-    if file not in current_files:
-        raise FileNotFoundError(f"{file} not found in {RAW_DATA_DIR}")
+def validate_raw_data() -> None:
+    if not RAW_DATA_DIR.exists():
+        raise FileNotFoundError("olist_analysis/data/raw does not exist")
 
+    current_files = {
+        file.name
+        for file in RAW_DATA_DIR.glob("*.csv")
+    }
 
-PROCESSED_DATA_DIR = MAIN_DIR / "data" / "processed"
-PROCESSED_DATA_DIR.mkdir(parents=True, exist_ok=True)
+    missing_files = EXPECTED_FILES - current_files
+
+    if missing_files:
+        raise FileNotFoundError(
+            f"Missing raw files: {sorted(missing_files)}"
+        )
 
 
 def normalize_text(series: pd.Series) -> pd.Series:
